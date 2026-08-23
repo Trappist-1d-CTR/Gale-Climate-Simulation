@@ -1,2 +1,4 @@
 # Gale Climate Model
-Mesocyclone's workplace for creating the climate model.
+
+Zeta Simulations Studio's workplace for creating Mesocyclone's climate model.
+
