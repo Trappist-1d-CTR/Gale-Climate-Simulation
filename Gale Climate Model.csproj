@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <EnableDynamicLoading></EnableDynamicLoading> <!-- hope this doesn't break anything -->
+    <EnableDynamicLoading>true</EnableDynamicLoading> <!-- hope this doesn't break anything -->
   </PropertyGroup>
 
 </Project>
