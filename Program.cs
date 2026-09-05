@@ -99,14 +99,29 @@ public sealed class Program
         public const double StefBoltz = 5.670374419e-8;
 
         /// <summary>
+        /// Boltzmann Constant. Unity: J/K
+        /// </summary>
+        public const double Boltzmann = 1.380649e-23;
+
+        /// <summary>
+        /// Omega Constant. Unit: none
+        /// </summary>
+        public const double Omega = 0.567143290409783873;
+
+        /// <summary>
         /// Molar Gas Constant. Unit: J / mol K
         /// </summary>
         public const double R = 8.31446261815324;
 
         /// <summary>
+        /// Avogadro's Numer. Unit: none
+        /// </summary>
+        public const double NA = 6.02214076e23;
+
+        /// <summary>
         /// 1/2 is Universally constant. Unit: none
         /// </summary>
-        public const double Zeta = 1 / 2;
+        public const double Zeta = 1.0 / 2.0;
     }
 
     /// <summary>
@@ -115,9 +130,50 @@ public sealed class Program
     public static class Unit
     {
         /// <summary>
-        /// The Radius of the Earth, as per SI standard. Unit: meters
+        /// Astrnomical Unit, equal to the semi-major axis of the Earth's orbit. Unit: m
         /// </summary>
-        public const double EarthRadii = 6.3781e6;
+        public const double AU = 1.495978707e11;
+
+        public struct Earth
+        {
+            /// <summary>
+            /// The Radius of the Earth, as per SI standard. Unit: m
+            /// </summary>
+            public const double Radius = 6.3781e6;
+
+            /// <summary>
+            /// The Mass of the Eartg, as per SI standard. Unit: kg
+            /// </summary>
+            public const double Mass = 5.9722e24;
+
+            /// <summary>
+            /// Earth's Atmospheric Pressure at sea level, as per SI standard. Unit: Pa = N / m^2
+            /// </summary>
+            public const double AtmPressure = 101325;
+
+            /// <summary>
+            /// Earth's average Amtospheric Heat Capacity. Unit: J / kg K
+            /// </summary>
+            public const double AtmHeatCapacity = 1006;
+        }
+
+        public struct Sun
+        {
+            /// <summary>
+            /// The Mass of the Sun, as per SI standard. Unit: kg
+            /// </summary>
+            public const double Mass = 1.988416e30;
+
+            /// <summary>
+            /// The Radius of the Sun, as per SI standard. Unit: m
+            /// </summary>
+            public const double Radius = 6.957e8;
+
+            /// <summary>
+            /// The Temperature of the Sun's photosphere. Unit: K
+            /// </summary>
+            public const double SurfaceTemp = 5777;
+        }
     }
 
     /// <summary>
@@ -125,33 +181,41 @@ public sealed class Program
     /// </summary>
     public static class Data
     {
-        //Input
-        /// <summary>
-        /// Mean Radius: the planet's average radius. Unit: meters
-        /// </summary>
-        public static double GaleR = 2 * Unit.EarthRadii;
+        //  Input
+        public struct Gale
+        {
+            /// <summary>
+            /// Mean Radius: the planet's average radius. Unit: meters
+            /// </summary>
+            public static double Radius = 2 * Unit.Earth.Radius;
 
-        /// <summary>
-        /// Albedo: percentage of incoming radiation that gets reflected out the system. Unit: none
-        /// </summary>
-        public static double GaleAlbedo = 0.9;
+            /// <summary>
+            /// Albedo: percentage of incoming radiation that gets reflected out the system. Unit: none
+            /// </summary>
+            public static double Albedo = 0.9;
 
-        /// <summary>
-        /// Greenhouse: percentage of outgoing radiation that gets reflected into the system. Unit: none
-        /// </summary>
-        public static double GaleGreenhouse = 0.8;
+            /// <summary>
+            /// Greenhouse: percentage of outgoing radiation that gets reflected into the system. Unit: none
+            /// </summary>
+            public static double Greenhouse = 0.8;
 
-        /// <summary>
-        /// Insolation: amount of radiation the planet receives from its star. Unit: W / m^2
-        /// </summary>
-        public static double Insolation = 5000;
+            /// <summary>
+            /// Insolation: amount of radiation the planet receives from its star. Unit: W / m^2
+            /// </summary>
+            public static double Insolation = 5000;
 
-        /// <summary>
-        /// Planetary Heat Capacity: amount of heat required to hear up the planet by 1 K. Unit: J / K
-        /// </summary>
-        public static double GaleHeatCapacity = 5000 * 4 * Math.PI * Math.Pow(Data.GaleR, 2);
+            /// <summary>
+            /// Planetary Heat Capacity: amount of heat required to hear up the planet by 1 K. Unit: J / K
+            /// </summary>
+            public static double HeatCapacity = 5000 * 4 * Math.PI * Math.Pow(Data.Gale.Radius, 2);
 
-        //Calculations (Middle and Output)
+            /// <summary>
+            /// Mean Temperature: the planet's average surface temperature. Unit: Kelvin
+            /// </summary>
+            public static double MeanTemperature = 0;
+        }
+
+        //  Calculations (Middle and Output)
         /// <summary>
         /// Incoming Energy in the planetary system. Unit: Joules
         /// </summary>
@@ -161,36 +225,25 @@ public sealed class Program
         /// Outgoing Energy in the planetary system. Unit: Joules
         /// </summary>
         public static double EnergyOut = 0;
-        
-        /// <summary>
-        /// Mean Temperature in the planetary system. Unit: Kelvin
-        /// </summary>
-        public static double MeanTemperature = 0;
     }
 
     #endregion
 
     /// <summary>
-    /// Main script of the program.
+    /// Main function of the program.
     /// </summary>
     /// <param name="args"></param>
     private static void Main(string[] args)
     {
-        Console.WriteLine("Simulation Begin\nTime: " + Sim.Time + "\nMeanT: " + Data.MeanTemperature);
+        Console.WriteLine("Press a key to begin the simulation.");
         Console.ReadKey();
 
         while (Sim.WithinTimeLimit)
         {
-            SimulationTimeStep();
-
             if (Sim.AtDataStep)
-            {
-                Console.WriteLine("Simulation Step Completed\nTime: " + Sim.Time);
-                Console.WriteLine("MeanT: " + Data.MeanTemperature);
-                Console.WriteLine("Ein: " + Data.EnergyIn);
-                Console.WriteLine("Eout: " + Data.EnergyOut);
-                Console.ReadKey();
-            }
+                SimulationDisplayData();
+
+            SimulationTimeStep();
         }
     }
 
@@ -199,11 +252,23 @@ public sealed class Program
     /// </summary>
     public static void SimulationTimeStep()
     {
-        Data.EnergyIn = Data.Insolation * (1 - Data.GaleAlbedo) * Math.PI * Math.Pow(Data.GaleR, 2);
-        Data.EnergyOut = 4 * Math.PI * Math.Pow(Data.GaleR, 2) * Data.GaleGreenhouse * Const.StefBoltz * Math.Pow(Data.MeanTemperature, 4);
+        Data.EnergyIn = Data.Gale.Insolation * (1 - Data.Gale.Albedo) * Math.PI * Math.Pow(Data.Gale.Radius, 2);
+        Data.EnergyOut = 4 * Math.PI * Math.Pow(Data.Gale.Radius, 2) * Data.Gale.Greenhouse * Const.StefBoltz * Math.Pow(Data.Gale.MeanTemperature, 4);
 
-        Data.MeanTemperature += (Data.EnergyIn - Data.EnergyOut) / Data.GaleHeatCapacity * Sim.TimeStep;
+        Data.Gale.MeanTemperature += (Data.EnergyIn - Data.EnergyOut) / Data.Gale.HeatCapacity * Sim.TimeStep;
 
         Sim.Step();
+    }
+
+    /// <summary>
+    /// Displays variables of the simulation.
+    /// </summary>
+    public static void SimulationDisplayData()
+    {
+        Console.WriteLine("Simulation Step Completed\nTime: " + Sim.Time);
+        Console.WriteLine("MeanT: " + Data.Gale.MeanTemperature);
+        Console.WriteLine("Ein: " + Data.EnergyIn);
+        Console.WriteLine("Eout: " + Data.EnergyOut);
+        Console.ReadKey();
     }
 }
